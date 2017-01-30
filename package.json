@@ -19,12 +19,17 @@
   "author": "Eric W. Greene",
   "license": "MIT",
   "devDependencies": {
-    "concurrently": "^3.0.0",
     "babel-eslint": "^7.1.1",
+    "babel-jest": "^18.0.0",
+    "concurrently": "^3.0.0",
+    "enzyme": "^2.7.1",
+    "jest": "^18.1.0",
     "json-server": "^0.9.4",
-    "webpack-dev-server": "^1.16.2",
+    "react-addons-test-utils": "^15.4.2",
+    "react-test-renderer": "^15.4.2",
     "rimraf": "^2.5.2",
-    "sass-lint": "^1.10.2"
+    "sass-lint": "^1.10.2",
+    "webpack-dev-server": "^1.16.2"
   },
   "dependencies": {
     "autoprefixer": "^6.5.4",
