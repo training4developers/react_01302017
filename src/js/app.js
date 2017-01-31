@@ -12,10 +12,10 @@ class ColorList extends React.Component {
             newColor: ''
         };
 
-        this.onChange = this.onChange.bind(this);
+        //this.onChange = this.onChange.bind(this);
     }
 
-    onChange(e) {
+    onChange = (e) => {
         this.setState({
             [e.currentTarget.name]: e.currentTarget.value
         });
@@ -34,7 +34,7 @@ class ColorList extends React.Component {
                 <div>
                     <label htmlFor="new-color-input">New Color</label>
                     <input type="text" id="new-color-input" name="newColor"
-                        value={this.state.newColor} onChange={this.onChange} />
+                        value={this.state.newColor} onChange={() => this.onChange()} />
                 </div>
             </form>
         </div>;
