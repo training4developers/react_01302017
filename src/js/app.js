@@ -1,18 +1,14 @@
-import React from 'react';
+import React, { Component, PropTypes } from 'react';
 import ReactDOM from 'react-dom';
+
+import { ColorHeader as MyColorHeader } from './components/color-header'; 
 
 const colors = ['green','yellow','black','red','white','blue'];
 
-class ColorHeader extends React.Component {
-    render() {
-        return <h1>Color Tool</h1>;
-    }
-}
-
-class ItemList extends React.Component {
+class ItemList extends Component {
 
     static propTypes = {
-        items: React.PropTypes.array
+        items: PropTypes.array
     };
 
     render() {
@@ -44,12 +40,12 @@ class ColorForm extends React.Component {
         });
     };
 
-    addNewColor = () => {
-        this.props.addColor(this.state.newColor);
-        this.setState({
-            newColor: ''
-        });
-    };
+    // addNewColor = () => {
+    //     this.props.addColor(this.state.newColor);
+    //     // this.setState({
+    //     //     newColor: ''
+    //     // });
+    // };
 
     render() {
         return <form>
@@ -58,7 +54,7 @@ class ColorForm extends React.Component {
                 <input type="text" id="new-color-input" name="newColor"
                     value={this.state.newColor} onChange={this.onChange} />
             </div>
-            <button type="button" onClick={this.addNewColor}>Add Color</button>
+            <button type="button" onClick={() => this.props.addColor(this.state.newColor)}>Add Color</button>
         </form>;
     }    
 
@@ -87,7 +83,7 @@ class ColorTool extends React.Component {
     render() {
 
         return <div>
-            <ColorHeader />
+            <MyColorHeader />
             <ItemList items={this.state.colors} />
             <ColorForm addColor={this.addColor} />
         </div>;
