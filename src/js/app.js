@@ -1,5 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
+import { createStore } from 'redux';
+import { connect } from 'react-redux';
 
 const createAddAction = value => ({ type: 'ADD', value });
 
@@ -24,18 +26,18 @@ const reducer = (state = 0, action) => {
 };
 
 
-const createStore = reducer => {
-    let currentState;
-    const fns = [];
-    return {
-        getState: () => currentState,
-        dispatch: action => {
-            currentState = reducer(currentState, action);
-            fns.forEach(fn => fn());
-        },
-        subscribe: fn => fns.push(fn),
-    };
-};
+// const createStore = reducer => {
+//     let currentState;
+//     const fns = [];
+//     return {
+//         getState: () => currentState,
+//         dispatch: action => {
+//             currentState = reducer(currentState, action);
+//             fns.forEach(fn => fn());
+//         },
+//         subscribe: fn => fns.push(fn),
+//     };
+// };
 
 const appStore = createStore(reducer);
 
@@ -69,37 +71,27 @@ const mapDispatchToProps = dispatch => {
 
 };
 
-const connect = (mapStateToProps, mapDispatchToProps) => {
-
-    return (componentToWrap) => {
-
-        return class Container extends React.Component {
-
-            static propTypes = {
-                store: React.PropTypes.object
-            };
-
-            componentDidMount() {
-
-                this.props.store.subscribe(() => {
-                    this.forceUpdate();
-                });
-
-                this.props.store.dispatch();
-
-            }
-
-            render() {
-                const componentProps = {};
-                Object.assign(componentProps, mapStateToProps(this.props.store.getState()));
-                Object.assign(componentProps, mapDispatchToProps(this.props.store.dispatch));
-                return React.createElement(componentToWrap, componentProps);
-            }
-        };
-
-    };
-
-};
+// const connect = (mapStateToProps, mapDispatchToProps) => {
+//     return (componentToWrap) => {
+//         return class Container extends React.Component {
+//             static propTypes = {
+//                 store: React.PropTypes.object
+//             };
+//             componentDidMount() {
+//                 this.props.store.subscribe(() => {
+//                     this.forceUpdate();
+//                 });
+//                 this.props.store.dispatch({ type: 'NOOP' });
+//             }
+//             render() {
+//                 const componentProps = {};
+//                 Object.assign(componentProps, mapStateToProps(this.props.store.getState()));
+//                 Object.assign(componentProps, mapDispatchToProps(this.props.store.dispatch));
+//                 return React.createElement(componentToWrap, componentProps);
+//             }
+//         };
+//     };
+// };
 
 const CalculatorContainer = connect(mapStateToProps, mapDispatchToProps)(Calculator);
 
