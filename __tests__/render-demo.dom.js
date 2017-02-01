@@ -16,7 +16,7 @@ describe('<RenderDemo /> Mock DOM', () => {
     });
 
     test('<RenderDemo /> renders', () => {
-        expect(componentDOMNode.textContent).toBe('Hello World!');
+        expect(componentDOMNode.textContent).toBe('Hello World!!');
     });
 	
 });

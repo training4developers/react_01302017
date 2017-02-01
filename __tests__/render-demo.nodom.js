@@ -13,7 +13,7 @@ describe('<RenderDemo /> No DOM', () => {
     });
 
     test('<RenderDemo /> renders', () => {
-        expect(component.props().children).toBe('Hello World!');
+        expect(component.props().children).toBe('Hello World!!');
     });
 
 });

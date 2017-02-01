@@ -1,98 +1,123 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { createStore } from 'redux';
+import keyMirror from 'key-mirror';
+import { createStore, bindActionCreators, applyMiddleware } from 'redux';
 import { connect } from 'react-redux';
+import thunk from 'redux-thunk';
 
-const createAddAction = value => ({ type: 'ADD', value });
-
-const createSubtractAction = value => ({
-    type: 'SUBTRACT',
-    value
+const actionTypes = keyMirror({
+    REFRESH_REQUEST: null,
+    REFRESH_DONE: null,
+    INSERT_REQUEST: null,
 });
 
-const reducer = (state = 0, action) => {
+const createRefreshRequestAction = () => ({
+    type: actionTypes.REFRESH_REQUEST,
+    authors: []
+});
 
-    if (action === null || action === undefined) return state;
+const createRefreshDoneAction = (authors) => ({
+    type: actionTypes.REFRESH_DONE,
+    authors
+});
 
-    console.log('state: ', state, 'action: ', action);
+const createInsertRequestAction = (author) => ({
+    type: actionTypes.INSERT_REQUEST,
+    author
+});
+
+const refreshAuthors = () => {
+    return dispatch => {
+        dispatch(createRefreshRequestAction());
+        return fetch('http://localhost:5000/authors')
+            .then(res => res.json())
+            .then(authors => dispatch(createRefreshDoneAction(authors)));
+    };
+};
+
+const insertAuthor = author => {
+    return dispatch => {
+        dispatch(createInsertRequestAction());
+        return fetch('http://localhost:5000/authors', {
+            method: 'POST',
+            headers: new Headers({ 'Content-Type': 'application/json'}),
+            body: JSON.stringify(author)
+        })
+            .then(() => fetch('http://localhost:5000/authors'))
+            .then(res => res.json())
+            .then(authors => dispatch(createRefreshDoneAction(authors)));
+    };
+};
+
+const reducer = (state = { authors: [] }, action) => {
+
     switch(action.type) {
-        case 'ADD':
-            return state + action.value;
-        case 'SUBTRACT':
-            return state - action.value;
+        case actionTypes.REFRESH_DONE:
+            return Object.assign({}, state, { authors: action.authors });
         default:
             return state;
     }
+
 };
 
+const appStore = createStore(reducer, applyMiddleware(thunk));
 
-// const createStore = reducer => {
-//     let currentState;
-//     const fns = [];
-//     return {
-//         getState: () => currentState,
-//         dispatch: action => {
-//             currentState = reducer(currentState, action);
-//             fns.forEach(fn => fn());
-//         },
-//         subscribe: fn => fns.push(fn),
-//     };
-// };
+class AuthorTool extends React.Component {
 
-const appStore = createStore(reducer);
+    static propTypes = {
+        authors: React.PropTypes.array,
+        refreshAuthors: React.PropTypes.func,
+        insertAuthor: React.PropTypes.func,
+    };
 
-class Calculator extends React.Component {
+    constructor(props) {
+        super(props);
+
+        this.state = {
+            firstName: '',
+            lastName: ''
+        };
+    }
+
+    componentDidMount() {
+        this.props.refreshAuthors();
+    }
+
+    onChange = e => {
+        this.setState({
+            [e.currentTarget.name]: e.currentTarget.value
+        });
+    };
+
+    addAuthor = () => {
+        this.props.insertAuthor({ firstName: this.state.firstName, lastName: this.state.lastName });
+    };
 
     render() {
         return <div>
-            <div>Current Value: {this.props.currentValue}</div>
-            <button onClick={() => this.props.add(3)}>Add 3</button>
-            <button onClick={() => this.props.subtract(5)}>Subtract 5</button>
+            <h1>Author Tool</h1>
+            <ul>
+                {this.props.authors.map(author => <li key={author.id}>{author.firstName} {author.lastName}</li>)}
+            </ul>
+            <form>
+                <div>
+                    <label>First Name:</label>
+                    <input type="text" name="firstName" value={this.state.firstName} onChange={this.onChange} />
+                </div>
+                <div>
+                    <label>Last Name:</label>
+                    <input type="text" name="lastName" value={this.state.lastName} onChange={this.onChange} />
+                </div>
+                <button type="button" onClick={this.addAuthor}>Add Author</button>
+            </form>
         </div>;
     }
+
 }
 
-const mapStateToProps = appState => {
+const AuthorToolContainer = connect(
+    ({ authors }) => ({ authors }),
+    dispatch => bindActionCreators({ refreshAuthors, insertAuthor }, dispatch)
+)(AuthorTool);
 
-    // props passed into the component
-    return {
-        currentValue: appState
-    };
-
-};
-
-const mapDispatchToProps = dispatch => {
-
-    // props passed into the component
-    return {
-        add: (value) => dispatch(createAddAction(value)),
-        subtract: (value) => dispatch(createSubtractAction(value)),
-    };
-
-};
-
-// const connect = (mapStateToProps, mapDispatchToProps) => {
-//     return (componentToWrap) => {
-//         return class Container extends React.Component {
-//             static propTypes = {
-//                 store: React.PropTypes.object
-//             };
-//             componentDidMount() {
-//                 this.props.store.subscribe(() => {
-//                     this.forceUpdate();
-//                 });
-//                 this.props.store.dispatch({ type: 'NOOP' });
-//             }
-//             render() {
-//                 const componentProps = {};
-//                 Object.assign(componentProps, mapStateToProps(this.props.store.getState()));
-//                 Object.assign(componentProps, mapDispatchToProps(this.props.store.dispatch));
-//                 return React.createElement(componentToWrap, componentProps);
-//             }
-//         };
-//     };
-// };
-
-const CalculatorContainer = connect(mapStateToProps, mapDispatchToProps)(Calculator);
-
-ReactDOM.render(<CalculatorContainer store={appStore} />, document.querySelector('main'));
+ReactDOM.render(<AuthorToolContainer store={appStore} />, document.querySelector('main'));
