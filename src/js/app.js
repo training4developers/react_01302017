@@ -1,93 +1,41 @@
-import React, { Component, PropTypes } from 'react';
+import React from 'react';
 import ReactDOM from 'react-dom';
 
-import { ColorHeader as MyColorHeader } from './components/color-header'; 
+import { ColorTool } from './components/color-tool';
 
 const colors = ['green','yellow','black','red','white','blue'];
 
-class ItemList extends Component {
 
-    static propTypes = {
-        items: PropTypes.array
-    };
-
-    render() {
-        return <ul>
-            {this.props.items.map(item =>
-                <li>{item}</li>
-            )}
-        </ul>;
-    }
-}
-
-class ColorForm extends React.Component {
-
-    static propTypes = {
-        addColor: React.PropTypes.func.isRequired
-    }
+class ColorToolContainer extends React.Component {
 
     constructor(props) {
         super(props);
 
         this.state = {
-            newColor: ''
+            colors: []
         };
     }
 
-    onChange = (e) => {
-        this.setState({
-            [e.currentTarget.name]: e.currentTarget.value
-        });
-    };
-
-    // addNewColor = () => {
-    //     this.props.addColor(this.state.newColor);
-    //     // this.setState({
-    //     //     newColor: ''
-    //     // });
-    // };
-
-    render() {
-        return <form>
-            <div>
-                <label htmlFor="new-color-input">New Color</label>
-                <input type="text" id="new-color-input" name="newColor"
-                    value={this.state.newColor} onChange={this.onChange} />
-            </div>
-            <button type="button" onClick={() => this.props.addColor(this.state.newColor)}>Add Color</button>
-        </form>;
-    }    
-
-}
-
-class ColorTool extends React.Component {
-
-    static propTypes = {
-        myColors: React.PropTypes.array
-    };    
-
-    constructor(props) {
-        super(props);
-
-        this.state = {
-            colors: this.props.myColors.concat()
-        };
-    }
-
-    addColor = (newColor) => {
-        this.setState({
-            colors: this.state.colors.concat(newColor)
-        });
+    componentDidMount() {
+        fetch('http://localhost:5000/cars')
+            .then(res => res.json())
+            .then(cars => {
+                this.setState({
+                    colors: cars.map(({color}) => color)
+                });
+            });
     }
 
     render() {
-
-        return <div>
-            <MyColorHeader />
-            <ItemList items={this.state.colors} />
-            <ColorForm addColor={this.addColor} />
-        </div>;
+        return <ColorTool
+            data-test="test-value"
+            myColors={this.state.colors} />;
     }
 }
 
-ReactDOM.render(<ColorTool myColors={colors} />, document.querySelector('main'));
+
+
+//ReactDOM.render(ColorToolContainer, document.querySelector('main'));
+
+
+

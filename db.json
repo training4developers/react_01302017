@@ -23,6 +23,13 @@
       "year": 2015,
       "color": "red",
       "price": 100000
+    },
+    {
+      "make": "Toyota",
+      "model": "Yaris",
+      "year": 2015,
+      "color": "yellow",
+      "id": 4
     }
   ],
   "owners": [

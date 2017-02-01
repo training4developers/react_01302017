@@ -2,6 +2,9 @@ import React from 'react';
 
 export class ColorHeader extends React.Component {
     render() {
-        return <h1>Color Tool</h1>;
+
+        const headerText = '<h1>Color Tool</h1>';
+
+        return <div dangerouslySetInnerHTML={({ __html: headerText})}></div>;
     }
 }

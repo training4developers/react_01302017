@@ -1,0 +1,5 @@
+exports[`<RenderDemo /> Mock DOM <RenderDemo /> snapshot 1`] = `
+<h1>
+  Hello World!
+</h1>
+`;
