@@ -1,41 +1,106 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 
-import { ColorTool } from './components/color-tool';
+const createAddAction = value => ({ type: 'ADD', value });
 
-const colors = ['green','yellow','black','red','white','blue'];
+const createSubtractAction = value => ({
+    type: 'SUBTRACT',
+    value
+});
 
+const reducer = (state = 0, action) => {
 
-class ColorToolContainer extends React.Component {
+    if (action === null || action === undefined) return state;
 
-    constructor(props) {
-        super(props);
-
-        this.state = {
-            colors: []
-        };
+    console.log('state: ', state, 'action: ', action);
+    switch(action.type) {
+        case 'ADD':
+            return state + action.value;
+        case 'SUBTRACT':
+            return state - action.value;
+        default:
+            return state;
     }
+};
 
-    componentDidMount() {
-        fetch('http://localhost:5000/cars')
-            .then(res => res.json())
-            .then(cars => {
-                this.setState({
-                    colors: cars.map(({color}) => color)
-                });
-            });
-    }
+
+const createStore = reducer => {
+    let currentState;
+    const fns = [];
+    return {
+        getState: () => currentState,
+        dispatch: action => {
+            currentState = reducer(currentState, action);
+            fns.forEach(fn => fn());
+        },
+        subscribe: fn => fns.push(fn),
+    };
+};
+
+const appStore = createStore(reducer);
+
+class Calculator extends React.Component {
 
     render() {
-        return <ColorTool
-            data-test="test-value"
-            myColors={this.state.colors} />;
+        return <div>
+            <div>Current Value: {this.props.currentValue}</div>
+            <button onClick={() => this.props.add(3)}>Add 3</button>
+            <button onClick={() => this.props.subtract(5)}>Subtract 5</button>
+        </div>;
     }
 }
 
+const mapStateToProps = appState => {
 
+    // props passed into the component
+    return {
+        currentValue: appState
+    };
 
-//ReactDOM.render(ColorToolContainer, document.querySelector('main'));
+};
 
+const mapDispatchToProps = dispatch => {
 
+    // props passed into the component
+    return {
+        add: (value) => dispatch(createAddAction(value)),
+        subtract: (value) => dispatch(createSubtractAction(value)),
+    };
 
+};
+
+const connect = (mapStateToProps, mapDispatchToProps) => {
+
+    return (componentToWrap) => {
+
+        return class Container extends React.Component {
+
+            static propTypes = {
+                store: React.PropTypes.object
+            };
+
+            componentDidMount() {
+
+                this.props.store.subscribe(() => {
+                    this.forceUpdate();
+                });
+
+                this.props.store.dispatch();
+
+            }
+
+            render() {
+                const componentProps = {};
+                Object.assign(componentProps, mapStateToProps(this.props.store.getState()));
+                Object.assign(componentProps, mapDispatchToProps(this.props.store.dispatch));
+                return React.createElement(componentToWrap, componentProps);
+            }
+        };
+
+    };
+
+};
+
+const CalculatorContainer = connect(mapStateToProps, mapDispatchToProps)(Calculator);
+
+ReactDOM.render(<CalculatorContainer store={appStore} />, document.querySelector('main'));
